@@ -53,7 +53,7 @@ def return_html_text_page():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Sample HTML Page</title>
+        <title>Text Page</title>
     </head>
     <body>
         <h1>Another Another World!</h1>
@@ -65,9 +65,7 @@ def return_html_image_page():
     with open("send_image.jpg", "rb") as f:
         image_data = f.read()
 
-    image_base64 = base64.b64encode(image_data).decode('utf-8')
-
-    # image_base64 = BytesIO(image_data).getvalue().decode('base64')
+    image_base64 = base64.b64encode(image_data).decode()
 
     return """
     <!DOCTYPE html>
@@ -75,7 +73,7 @@ def return_html_image_page():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Sample HTML Page</title>
+        <title>Image Page</title>
     </head>
     <body>
         <img src="data:image/jpg;base64, {}" alt="Sample Image">
@@ -87,7 +85,7 @@ def return_html_text_image_page():
     with open("moodle_format.jpg", "rb") as f:
         image_data = f.read()
 
-    image_base64 = BytesIO(image_data).getvalue().decode('base64')
+    image_base64 = base64.b64encode(image_data).decode()
 
     return """
     <!DOCTYPE html>
@@ -95,7 +93,7 @@ def return_html_text_image_page():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Sample HTML Page</title>
+        <title>Image with Text Page</title>
     </head>
     <body>
         <h1>Another Another World!</h1>
@@ -103,6 +101,21 @@ def return_html_text_image_page():
     </body>
     </html>
     """.format(image_base64)
+
+def return_html_error():
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Error Page</title>
+    </head>
+    <body>
+        <h1>Cara, alguma coisa deu errado!</h1>
+    </body>
+    </html>
+    """
 
 #Recebe comandos do cliente
 def get_commands(client_socket, adress):
@@ -126,20 +139,25 @@ def get_commands(client_socket, adress):
     elif "image" in path:
         html_content = return_html_image_page()
 
-        response_headers = "HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nContent-Length: {}\r\n\r\n".format(len(html_content))
-        client_socket.sendall(response_headers.encode("utf-8"))
-        
-        # Send the HTML content
-        client_socket.sendall(html_content.encode("utf-8"))
+        response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + html_content
+
+        client_socket.sendall(response.encode("utf-8"))
 
     elif "both" in path:
         html_content = return_html_text_image_page()
 
-        response_headers = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\n\r\n".format(len(html_content))
-        client_socket.sendall(response_headers.encode("utf-8"))
-        
-        # Send the HTML content
-        client_socket.sendall(html_content)
+        response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + html_content
+
+        client_socket.sendall(response.encode("utf-8"))
+    
+    else:
+        html_content = return_html_error()
+
+        # Send the response headers
+        "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n"
+        response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n" + html_content
+        client_socket.sendall(response.encode("utf-8"))
+
 
     # Close the connection
     print(f"Conexao fechada com: {adress}!")
@@ -151,6 +169,9 @@ def main():
     bind_socket(server_socket)
 
     print("Servidor está ouvindo em ", (HOST, PORT))
+
+    # ######################### Exemplo de request pelo browser quando o server tiver rodando
+    # http://xxx.xxx.xxx.x:9999/both
 
     while True:
         # Aqui recebe o ip, port
