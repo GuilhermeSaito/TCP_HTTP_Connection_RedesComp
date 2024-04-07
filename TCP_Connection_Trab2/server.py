@@ -34,6 +34,9 @@ def checksumSHA256(data):
     #Inicializa um objeto hashlib com o algoritmo SHA-256
     hasher = hashlib.sha256()
 
+    print("----------------- DATA SERVER SIDE -----------------")
+    print(data)
+
     #Atualiza o hasher com os dados de entrada
     hasher.update(data)
 
@@ -41,8 +44,38 @@ def checksumSHA256(data):
     checksum = hasher.hexdigest()
     return checksum
 
-def request_file(client_socket, dataString):
-    print("Funcao para mandar os arquivos caso escolhido")
+def request_file(client_socket, dataString, adress):
+    file_name = dataString.split(' ')[1] # Nome
+    print(f'Recebendo arquivo {file_name}!')
+
+    # Verifica se arquivo existe
+    if os.path.isfile(file_name):
+        try:
+            with open(file_name, 'rb') as f:
+                cont = 0
+                while data := f.read(BUFFER):
+                    size = len(data)                        # Tamanho
+                    checksum = checksumSHA256(data = data)  # Hash
+                    status = "ok"                           # Status
+
+                    send_data = f"{file_name}{cont}\n{size}\n{checksum}\n{data}\n{status}\n".encode('utf-8')
+
+                    print("--------------------- Arquivo INTEIRO mandado ---------------------")
+                    print(f"{file_name}{cont}\n{size}\n{checksum}\n{data}\n{status}\n")
+                    print("--------------------- Arquivo mandado ---------------------")
+                    print(data)
+
+                    client_socket.send(send_data)
+                    print(f"Arquivo enviado para {adress}! Part {cont}")
+
+                    cont += 1
+            
+        except FileNotFoundError as msg:
+            print(f"Problema ao abrir o arquivo: {adress}! {msg}")
+            client_socket.send(f'{file_name}\n0\n0\n0\nnok\n'.encode('utf-8'))
+    else:
+        print(f"Arquivo não existente {adress}!")
+        client_socket.send(f'{file_name}\n0\n0\n0\nnok\n'.encode('utf-8'))
 
 def chat(client_socket, adress):
     client_socket.send("Modo Chat ".encode('utf-8'))
@@ -72,7 +105,7 @@ def get_commands(client_socket, adress):
             break
         
         elif dataString.startswith('Arquivo'):
-            request_file(client_socket = client_socket, dataString = dataString)
+            request_file(client_socket = client_socket, dataString = dataString, adress = adress)
 
         elif dataString == 'Chat':
             chat(client_socket = client_socket, adress = adress)
