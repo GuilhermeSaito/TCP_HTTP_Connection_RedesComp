@@ -44,8 +44,20 @@ def checksumSHA256(data):
 def request_file(client_socket, dataString):
     print("Funcao para mandar os arquivos caso escolhido")
 
-def chat(client_socket):
-    print("Funcao para o servidor mandar exatamente igual o que estah recebendo para o cliente")
+def chat(client_socket, adress):
+    client_socket.send("Modo Chat ".encode('utf-8'))
+    print(f'{adress} conectado ao Chat!')
+
+    while True:
+        message = client_socket.recv(1024).decode('utf-8')
+
+        if message.lower() == "sair":
+            print(f"{adress} Saiu do Chat!")
+            break
+
+        print(f"Mensagem ({adress}): {message}")
+    
+    client_socket.send("Saindo do modo chat.".encode('utf-8'))
 
 #Recebe comandos do cliente
 def get_commands(client_socket, adress):
@@ -53,6 +65,8 @@ def get_commands(client_socket, adress):
         dataString = client_socket.recv(BUFFER).decode('utf-8').strip()
 
         if dataString == 'Sair':
+            print(f'{adress} saiu da conexao com o servidor!')
+
             client_socket.send('Fechando conexão. '.encode('utf-8'))
             client_socket.close()
             break
@@ -61,7 +75,7 @@ def get_commands(client_socket, adress):
             request_file(client_socket = client_socket, dataString = dataString)
 
         elif dataString == 'Chat':
-            chat(client_socket = client_socket)
+            chat(client_socket = client_socket, adress = adress)
     
 #Envia arquivo solicitado pelo cliente
 def send_file(fileName, adress, packetNumber):
