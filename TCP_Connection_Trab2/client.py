@@ -7,7 +7,7 @@ import socket
 import hashlib
 
 SERVER_IP = 'localhost'
-SERVER_PORT = 9999
+SERVER_PORT = 9998
 BUFFER = 2048
 SERVER_BUFFER = 1024
 
@@ -22,9 +22,6 @@ def create_socket():
 def checksumSHA256(dados):
     #Inicializa um objeto hashlib com o algoritmo SHA-256
     hasher = hashlib.sha256()
-
-    print("----------------- DADOS CLIENT SIDE -----------------")
-    print(dados.encode('utf-8'))
 
     #Atualiza o hasher com os dados de entrada
     hasher.update(dados.encode('utf-8'))
@@ -42,45 +39,23 @@ def receive_file_data():
     with open(recvFile, 'wb') as file:
         while file_size == SERVER_BUFFER:
             file_info = client_socket.recv(BUFFER).decode('utf-8')
-            print("--------------------- File info ---------------------")
-            print(file_info)
 
-            # if not file_info:
-            #     print("Ta caindo aqui?")
-            #     break
-
-            file_info_split = file_info.split('\n')
-            print("--------------------- File info split ---------------------")
-            print(file_info_split)
-
+            file_info_split = file_info.split('>')
             file_name = file_info_split[0]
-            print("--------------------- File name ---------------------")
-            print(file_name)
             file_size = int(file_info_split[1])
-            print("--------------------- File size ---------------------")
-            print(file_size)
             file_checksum = file_info_split[2]
-            print("--------------------- File checksum ---------------------")
-            print(file_checksum)
-            data = file_info_split[3]
-            print("--------------------- File data ---------------------")
-            print(data)
-            file_status = file_info_split[4]
-            print("--------------------- File status ---------------------")
-            print(file_status)
+            file_status = file_info_split[3]
+            data = file_info_split[4]
 
+            # print("--------------- DATA ------------------")
+            # print(data)
 
             # Arquivo não foi encontrado
             if file_status == "nok":
                 print("Arquivo inexistente no servidor ou erro na abertura do arquivo.")
                 return
 
-            print("--------------------- Data Encode ---------------------")
-            print(data.encode('utf-8'))
-
             file.write(data.encode('utf-8'))
-
-            print("Vai fazer o checksum")
 
             data_checksum = checksumSHA256(data)
 

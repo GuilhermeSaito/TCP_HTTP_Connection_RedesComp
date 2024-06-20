@@ -5,7 +5,7 @@ import os
 import threading
 
 HOST = '0.0.0.0'
-PORT = 9999
+PORT = 9998
 BUFFER = 1024
 
 #Create a Socket (connect two computers)
@@ -58,14 +58,26 @@ def request_file(client_socket, dataString, adress):
                     checksum = checksumSHA256(data = data)  # Hash
                     status = "ok"                           # Status
 
-                    send_data = f"{file_name}{cont}\n{size}\n{checksum}\n{data}\n{status}\n".encode('utf-8')
+                    # send_data = f"{file_name}{cont}\n{size}\n{checksum}\n{data}\n{status}\n".encode('utf-8')
 
-                    print("--------------------- Arquivo INTEIRO mandado ---------------------")
-                    print(f"{file_name}{cont}\n{size}\n{checksum}\n{data}\n{status}\n")
-                    print("--------------------- Arquivo mandado ---------------------")
+                    # print("--------------------- Arquivo INTEIRO mandado ---------------------")
+                    # print(f"{file_name}{cont}\n{size}\n{checksum}\n{data}\n{status}\n")
+                    # print("--------------------- Arquivo mandado ---------------------")
+                    # print(data)
+
+                    # client_socket.send(send_data)
+                    client_socket.send(file_name.encode('utf-8') +
+                                       str(cont).encode('utf-8') +
+                                       ">".encode('utf-8') +
+                                       str(size).encode('utf-8') +
+                                       ">".encode('utf-8') +
+                                       checksum.encode('utf-8') +
+                                       ">".encode('utf-8') +
+                                       status.encode('utf-8') +
+                                       ">".encode('utf-8') +
+                                       data)
+                    print("-------------- TESTE")
                     print(data)
-
-                    client_socket.send(send_data)
                     print(f"Arquivo enviado para {adress}! Part {cont}")
 
                     cont += 1
