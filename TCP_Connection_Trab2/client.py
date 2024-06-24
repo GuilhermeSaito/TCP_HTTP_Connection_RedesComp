@@ -7,7 +7,7 @@ import socket
 import hashlib
 
 SERVER_IP = 'localhost'
-SERVER_PORT = 9998
+SERVER_PORT = 9990
 BUFFER = 2048
 SERVER_BUFFER = 1024
 
@@ -40,25 +40,21 @@ def receive_file_data():
         while file_size == SERVER_BUFFER:
             file_info = client_socket.recv(BUFFER).decode('utf-8')
 
+            if file_info == '1':
+                print("Arquivo inexistente no servidor ou erro na abertura do arquivo.")
+                return
+            
             file_info_split = file_info.split('>')
+            print(file_info_split[0])
             file_name = file_info_split[0]
             file_size = int(file_info_split[1])
             file_checksum = file_info_split[2]
             file_status = file_info_split[3]
             data = file_info_split[4]
 
-            # print("--------------- DATA ------------------")
-            # print(data)
-
-            # Arquivo não foi encontrado
-            if file_status == "nok":
-                print("Arquivo inexistente no servidor ou erro na abertura do arquivo.")
-                return
-
             file.write(data.encode('utf-8'))
 
             data_checksum = checksumSHA256(data)
-
 
             if data_checksum == file_checksum:
                 print(f'Arquivo {file_name} recebido e verificado com sucesso.')

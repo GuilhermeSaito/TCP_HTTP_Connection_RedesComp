@@ -5,7 +5,7 @@ import os
 import threading
 
 HOST = '0.0.0.0'
-PORT = 9998
+PORT = 9990
 BUFFER = 1024
 
 #Create a Socket (connect two computers)
@@ -87,7 +87,7 @@ def request_file(client_socket, dataString, adress):
             client_socket.send(f'{file_name}\n0\n0\n0\nnok\n'.encode('utf-8'))
     else:
         print(f"Arquivo não existente {adress}!")
-        client_socket.send(f'{file_name}\n0\n0\n0\nnok\n'.encode('utf-8'))
+        client_socket.send('1'.encode('utf-8'))
 
 def chat(client_socket, adress):
     client_socket.send("Modo Chat ".encode('utf-8'))
