@@ -58,13 +58,6 @@ def request_file(client_socket, dataString, adress):
                     checksum = checksumSHA256(data = data)  # Hash
                     status = "ok"                           # Status
 
-                    # send_data = f"{file_name}{cont}\n{size}\n{checksum}\n{data}\n{status}\n".encode('utf-8')
-
-                    # print("--------------------- Arquivo INTEIRO mandado ---------------------")
-                    # print(f"{file_name}{cont}\n{size}\n{checksum}\n{data}\n{status}\n")
-                    # print("--------------------- Arquivo mandado ---------------------")
-                    # print(data)
-
                     # client_socket.send(send_data)
                     client_socket.send(file_name.encode('utf-8') +
                                        str(cont).encode('utf-8') +
@@ -84,7 +77,7 @@ def request_file(client_socket, dataString, adress):
             
         except FileNotFoundError as msg:
             print(f"Problema ao abrir o arquivo: {adress}! {msg}")
-            client_socket.send(f'{file_name}\n0\n0\n0\nnok\n'.encode('utf-8'))
+            client_socket.send('1'.encode('utf-8'))
     else:
         print(f"Arquivo não existente {adress}!")
         client_socket.send('1'.encode('utf-8'))
@@ -122,44 +115,6 @@ def get_commands(client_socket, adress):
         elif dataString == 'Chat':
             chat(client_socket = client_socket, adress = adress)
     
-#Envia arquivo solicitado pelo cliente
-def send_file(fileName, adress, packetNumber):
-    packge_num = 0
-
-    if not os.path.isfile(fileName):
-        print("Arquivo nao encontrado: " + fileName)
-        server_socket.sendto(b"1", adress)
-    else:
-        try:
-            with open(fileName, 'rb') as f:
-                while data := f.read(BUFFER):
-                    packge_num += 1
-
-                    # Calcula checksum com SHA-256
-                    checksum = checksumSHA256(data)
-
-                    check = 'NOK'
-
-                    #Verifica se o pacote foi enviado corretamente
-                    while check == 'NOK':
-                        server_socket.sendto(checksum.encode('utf-8') + ";".encode('utf-8') + str(packge_num).encode('utf-8') + ">".encode('utf-8') + data, adress)
-                        check = server_socket.recvfrom(BUFFER)
-                        check = check[0].decode('utf-8')
-                        if check == 'NOK':
-                            print('NOK recebido. Reenviando parte do arquivo.')
-                    
-                    # Incrementa o número do pacote para o próximo
-                    # packetNumber += 1
-
-        #Se o arquivo não existir
-        except FileNotFoundError as msg:
-            print("Deu algum error:" + str(msg + "\n"))
-            server_socket.sendto(b"ERRO!", adress)
-            
-        # Mensagem de finalização do arquivo
-        print(f'Arquivo {fileName} enviado para {adress}')
-        server_socket.sendto(b'', adress)
-
 def main():
     server_socket = create_socket()
     bind_socket(server_socket)
