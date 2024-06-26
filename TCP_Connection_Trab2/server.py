@@ -34,9 +34,6 @@ def checksumSHA256(data):
     #Inicializa um objeto hashlib com o algoritmo SHA-256
     hasher = hashlib.sha256()
 
-    print("----------------- DATA SERVER SIDE -----------------")
-    print(data)
-
     #Atualiza o hasher com os dados de entrada
     hasher.update(data)
 
@@ -69,8 +66,7 @@ def request_file(client_socket, dataString, adress):
                                        status.encode('utf-8') +
                                        ">".encode('utf-8') +
                                        data)
-                    print("-------------- TESTE")
-                    print(data)
+                    
                     print(f"Arquivo enviado para {adress}! Part {cont}")
 
                     cont += 1
